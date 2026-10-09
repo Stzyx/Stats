@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pro Stat Projector</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark;
+--bg:#0b0f17;--panel:#121826;--panel2:#182033;--border:#243049;--text:#e8edf7;--muted:#8a97b2;--accent:#2ee6a6;--blue:#3b82f6;--warn:#fbbf24;--bad:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 50% -200px,#14213d 0%,var(--bg) 60%) no-repeat,var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.6rem;margin:6px 0 2px;letter-spacing:-.02em}h1 span{color:var(--accent)}
+header p{margin:0 0 16px;color:var(--muted);font-size:.95rem}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.notice{border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.07);color:#fde68a;font-size:.86rem}
+.field{display:block;font-size:.76rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+input[type=text],select,textarea{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font:inherit;font-size:1rem;outline:none}
+textarea{min-height:84px;resize:vertical;font-size:.92rem}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.stack>*+*{margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;padding:8px 13px;border-radius:999px;background:var(--panel2);border:1px solid var(--border);font-size:.88rem;cursor:pointer;user-select:none}
+.chip input:checked+span{background:rgba(46,230,166,.14);border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip input:focus-visible+span{box-shadow:0 0 0 3px rgba(59,130,246,.35)}
+.toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.88rem;color:var(--muted)}
+.toggle input{accent-color:var(--accent);width:18px;height:18px}
+.go{width:100%;border:0;border-radius:14px;padding:16px;font-size:1.1rem;font-weight:800;color:#04130d;cursor:pointer;background:linear-gradient(135deg,var(--accent),#22c1e6);box-shadow:0 8px 24px rgba(46,230,166,.25)}
+.go:disabled{opacity:.6;cursor:not-allowed}
+.stop{margin-top:12px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 16px;cursor:pointer}
+.loading{text-align:center;padding:26px 10px}.loading small{color:var(--muted)}
+.spinner{width:38px;height:38px;border-radius:50%;margin:0 auto 12px;border:4px solid var(--border);border-top-color:var(--accent);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.08);color:#fecaca}.error strong{color:var(--bad)}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.head h2{margin:0;font-size:1.35rem}.sub{color:var(--muted);font-size:.9rem}
+.badge{padding:5px 12px;border-radius:999px;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.badge.high{background:rgba(46,230,166,.15);color:var(--accent);border:1px solid var(--accent)}
+.badge.medium{background:rgba(251,191,36,.12);color:var(--warn);border:1px solid var(--warn)}
+.badge.low{background:rgba(248,113,113,.12);color:var(--bad);border:1px solid var(--bad)}
+.game{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--border);font-size:.92rem}
+.game.none{border-color:rgba(251,191,36,.5);color:#fde68a}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px}
+.tile{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px}
+.tile.combined{border-color:var(--blue);background:rgba(59,130,246,.1)}
+.tile .name{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.tile .num{font-size:2.3rem;font-weight:800;line-height:1.15;color:var(--accent);letter-spacing:-.02em}
+.tile.combined .num{color:#93c5fd}.tile .meta{font-size:.8rem;color:var(--muted)}
+.lean{display:inline-block;margin-top:4px;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--panel);border:1px solid var(--border)}
+.lean.over{color:var(--accent)}.lean.under{color:var(--bad)}
+.why{margin-top:8px;font-size:.84rem;color:#c7d0e4}
+h3{margin:0 0 8px;font-size:1rem}
+.factor{padding:9px 0;border-top:1px solid var(--border);font-size:.9rem}
+.factor b{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:2px}
+.caveat{font-size:.8rem;color:var(--muted);margin-top:10px}
+footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:22px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Pro <span>Stat Projector</span></h1>
+    <p>A 25-year stats analyst's projection for a player's next game.</p>
+  </header>
+
+  <!-- This page runs on your own Claude account via the viewer's "sample" capability, so no API key is needed.
+       That call cannot browse the web, so the model works from its own knowledge plus anything you paste below. -->
+  <section class="card notice" id="notice">
+    <b>Heads up:</b> this hosted version can't search the web. Projections come from the model's built-in knowledge, which may be out of date for recent games, injuries, trades, and betting lines. For best results, paste current info into the optional box below (recent game log, next opponent, injury news, prop line).
+  </section>
+
+  <section class="card stack">
+    <div class="row">
+      <div><label class="field" for="sport">Sport</label><select id="sport"></select></div>
+      <div style="flex:1.6"><label class="field" for="player">Player Name</label><input type="text" id="player" placeholder="e.g. Stephen Curry" autocomplete="off"></div>
+    </div>
+    <div>
+      <label class="field">Stats (pick one or more)</label>
+      <div class="chips" id="stats"></div>
+      <label class="toggle hidden" id="comboWrap"><input type="checkbox" id="combo" checked> Also show a combined total of the selected stats</label>
+    </div>
+    <div>
+      <label class="field" for="ctx">Current info (optional, recommended)</label>
+      <textarea id="ctx" placeholder="Paste anything current: last 5-10 game stats, next opponent and date, home/away, injury news, sportsbook prop line..."></textarea>
+    </div>
+    <button class="go" id="go" type="button">Get Projection</button>
+  </section>
+
+  <div id="out" aria-live="polite"></div>
+  <footer>Projections are educated estimates, not guarantees. For entertainment and informational use only.</footer>
+</div>
+
+<script>
+const STATS={
+"NFL":["Passing Yards","Passing TDs","Completions","Pass Attempts","Interceptions Thrown","Rushing Yards","Rush Attempts","Rushing TDs","Receptions","Receiving Yards","Receiving TDs","Targets","Sacks","Tackles","Field Goals Made"],
+"NBA":["Points","Rebounds","Assists","Steals","Blocks","3-Pointers Made","Turnovers","Minutes"],
+"WNBA":["Points","Rebounds","Assists","Steals","Blocks","3-Pointers Made","Turnovers","Minutes"],
+"MLB":["Hits","Runs","RBIs","Home Runs","Total Bases","Stolen Bases","Batter Strikeouts","Pitcher Strikeouts","Innings Pitched","Earned Runs Allowed","Hits Allowed"],
+"NHL":["Goals","Assists","Points","Shots on Goal","Blocked Shots","Hits","Power Play Points","Saves","Goals Against"],
+"Soccer":["Goals","Assists","Shots","Shots on Target","Saves","Tackles","Passes Completed"],
+"College Football":["Passing Yards","Passing TDs","Rushing Yards","Rushing TDs","Receptions","Receiving Yards","Receiving TDs"],
+"College Basketball":["Points","Rebounds","Assists","Steals","Blocks","3-Pointers Made"]
+};
+
+const ANALYST=`You are a veteran sports statistician with 25+ years of experience projecting individual player stat lines across the NFL, NBA, WNBA, MLB, NHL, soccer, and college sports. You are disciplined, numbers-first, and honest about uncertainty.
+
+IMPORTANT LIMIT: you cannot browse the web in this session. Work from what you reliably know plus the CURRENT INFO the user pasted (treat pasted info as the freshest data and prioritize it). Never invent specific game logs, opponent rankings, injury reports, or betting lines. If you don't reliably know something, say so in data_caveats and use null/unknown. Because live data is unavailable, confidence should be "low" unless the pasted info is substantial, and "high" only if the pasted info is detailed and consistent.
+
+Weigh like a pro: recent form and role first, then matchup and opponent defense vs. position, then minutes/snap expectations, then market lines (only if provided) as a sanity check, then home/away splits and head-to-head. If the next opponent/date is not provided or not reliably known, set next_game.found to false and project from recent form and season averages. Give one realistic number per stat (decimals allowed; use .5 steps for low-count stats).`;
+
+const FORMAT=`Reply with ONLY one JSON object (no markdown) of this shape:
+{"player":"full name","team":"team","position":"pos","next_game":{"found":false,"opponent":"","date":"","home_away":"home|away|neutral|unknown","note":"short"},
+"projections":[{"stat":"exact stat name requested","projection":0,"range_low":0,"range_high":0,"market_line":null,"lean":"over|under|none","reason":"1-2 plain sentences"}],
+"factors":{"recent_form":"","matchup":"","defense_rank":"","home_away":"","injuries_minutes":"","market_context":""},
+"overall_reason":"2-3 sentences","confidence":"low|medium|high","confidence_reason":"one sentence","data_caveats":"what is missing/uncertain"}
+"market_line" is a number only if the user pasted one, else null. For factors you can't support, write "Not available without live data." If the player is unknown or unusable, reply ONLY: {"error":"player_not_found","message":"short explanation"}`;
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=>(v!==null&&v!==""&&v!==undefined&&isFinite(Number(v)))?Number(v):null;
+const fmt=n=>(Math.round(n*10)/10).toString();
+
+const sportSel=$("sport");
+Object.keys(STATS).forEach(s=>sportSel.add(new Option(s,s)));sportSel.value="NBA";
+function selected(){return[...document.querySelectorAll("#stats input:checked")].map(i=>i.value)}
+function updateCombo(){$("comboWrap").classList.toggle("hidden",selected().length<2)}
+function buildChips(){
+  const box=$("stats");box.innerHTML="";
+  STATS[sportSel.value].forEach((s,i)=>{
+    const l=document.createElement("label");l.className="chip";
+    l.innerHTML=`<input type="checkbox" id="st${i}" value="${esc(s)}"><span>${esc(s)}</span>`;
+    l.querySelector("input").addEventListener("change",updateCombo);box.appendChild(l);
+  });updateCombo();
+}
+sportSel.addEventListener("change",buildChips);buildChips();
+$("player").addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+$("go").addEventListener("click",run);
+
+let ctl=null,timer=null,sampleFn=null,sampleReady=false;
+claude.use("sample").then(s=>{sampleFn=s;sampleReady=true;if(!s)$("notice").innerHTML="<b>Unavailable here:</b> this page needs to be opened inside Claude to generate projections."}).catch(()=>{sampleReady=true});
+
+const ERR={
+  not_granted:"Allow this page to use Claude when prompted, then try again.",
+  sampling_disabled:"Claude isn't available for this account or organization.",
+  not_declared:"This page is no longer allowed to use Claude.",
+  rate_limited:"Too many requests or usage limit reached. Wait a bit and try again.",
+  session_expired:"Your session expired. Sign in again and retry.",
+  refused:"The request was declined. Try rephrasing the player or stats.",
+  empty_completion:"No answer came back. Try again.",
+  invalid_json:"The answer couldn't be read. Please try again.",
+  prompt_too_large:"The pasted info is too long. Trim it and try again."
+};
+
+async function run(){
+  const player=$("player").value.trim(),sport=sportSel.value,stats=selected(),ctx=$("ctx").value.trim().slice(0,20000);
+  if(!player)return showError("Type a player's name.");
+  if(!stats.length)return showError("Pick at least one stat.");
+  if(!sampleFn)return showError(sampleReady?"This page needs to be opened inside Claude to generate projections.":"Still starting up. Try again in a moment.");
+  const today=new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const prompt=`${ANALYST}\n\nToday's date: ${today}.\nProject the NEXT game for this player.\nPlayer: ${player}\nSport/League: ${sport}\nStats to project: ${stats.join(", ")}\n\nCURRENT INFO (pasted by user, may be empty):\n${ctx||"(none provided)"}\n\nIf the name is ambiguous, pick the most prominent active ${sport} player and say so in data_caveats.\n\n${FORMAT}`;
+  ctl=new AbortController();setLoading(true);
+  try{
+    const r=await sampleFn.json(prompt,{signal:ctl.signal,cache:false});
+    if(r&&r.error)throw{plain:r.error==="player_not_found"?`Player not found. ${r.message||"Check the spelling and the selected sport."}`:(r.message||"Something went wrong.")};
+    if(!r||!Array.isArray(r.projections)||!r.projections.length)throw{plain:"No projection was returned. Please try again."};
+    render(r,stats);
+  }catch(e){
+    if(e&&e.code==="cancelled"){$("out").innerHTML="";}
+    else showError(e&&e.plain?e.plain:(ERR[e&&e.code]||"Something went wrong. Please try again."));
+  }finally{setLoading(false)}
+}
+
+function setLoading(on){
+  $("go").disabled=on;$("go").textContent=on?"Analyzing…":"Get Projection";clearInterval(timer);
+  if(on){
+    const steps=["Reviewing recent form…","Weighing the matchup…","Checking defense vs. position…","Estimating minutes and role…","Crunching the projection…"];let i=0;
+    $("out").innerHTML=`<div class="card loading"><div class="spinner"></div><div id="status">${steps[0]}</div><small>This can take 15–60 seconds.</small><div><button class="stop" id="stop" type="button">Stop</button></div></div>`;
+    $("stop").onclick=()=>ctl&&ctl.abort();
+    timer=setInterval(()=>{i=(i+1)%steps.length;const s=$("status");if(s)s.textContent=steps[i]},4500);
+  }
+}
+function showError(m){$("out").innerHTML=`<div class="card error"><strong>Couldn't get a projection.</strong><div style="margin-top:6px">${esc(m)}</div></div>`}
+
+function render(r,req){
+  const conf=["low","medium","high"].includes(String(r.confidence).toLowerCase())?String(r.confidence).toLowerCase():"low";
+  const g=r.next_game||{},ha={home:"Home",away:"Away",neutral:"Neutral site"}[g.home_away]||"";
+  const game=g.found&&g.opponent
+    ?`<div class="game"><b>Next game:</b> ${esc(ha?ha+" vs. ":"vs. ")}${esc(g.opponent)}${g.date?" · "+esc(g.date):""}${g.note?`<div class="sub">${esc(g.note)}</div>`:""}</div>`
+    :`<div class="game none"><b>No upcoming game found.</b> Projection is based on recent form and season averages instead.${g.note?`<div class="sub">${esc(g.note)}</div>`:""}</div>`;
+  const P=r.projections;
+  let tiles=P.map(p=>{
+    const v=num(p.projection),lo=num(p.range_low),hi=num(p.range_high),ml=num(p.market_line),lean=["over","under"].includes(p.lean)?p.lean:"";
+    return `<div class="tile"><div class="name">${esc(p.stat)}</div><div class="num">${v===null?"—":"~"+fmt(v)}</div>
+    <div class="meta">${lo!==null&&hi!==null?`Range ${fmt(lo)}–${fmt(hi)}`:""}${ml!==null?` · Book line ${fmt(ml)}`:""}</div>
+    ${lean?`<span class="lean ${lean}">Lean ${lean.toUpperCase()}</span>`:""}${p.reason?`<div class="why">${esc(p.reason)}</div>`:""}</div>`;
+  }).join("");
+  const vals=P.map(p=>num(p.projection));
+  if($("combo").checked&&req.length>1&&vals.every(v=>v!==null))
+    tiles+=`<div class="tile combined"><div class="name">Combined total</div><div class="num">~${fmt(vals.reduce((a,b)=>a+b,0))}</div><div class="meta">${esc(P.map(p=>p.stat).join(" + "))}</div></div>`;
+  const f=r.factors||{};
+  const rows=[["Recent form",f.recent_form],["Matchup",f.matchup],["Defense vs. position",f.defense_rank],["Home / away",f.home_away],["Injuries & minutes",f.injuries_minutes],["Betting market",f.market_context]]
+    .filter(x=>x[1]).map(x=>`<div class="factor"><b>${esc(x[0])}</b>${esc(x[1])}</div>`).join("");
+  $("out").innerHTML=`<div class="card"><div class="head"><div><h2>${esc(r.player||$("player").value)}</h2><div class="sub">${esc([r.position,r.team].filter(Boolean).join(" · "))}</div></div><span class="badge ${conf}">${conf} confidence</span></div>${game}<div class="tiles">${tiles}</div></div>
+  <div class="card"><h3>Why this projection</h3>${r.overall_reason?`<p style="margin:0 0 8px">${esc(r.overall_reason)}</p>`:""}${rows}
+  ${r.confidence_reason?`<div class="caveat"><b>Confidence:</b> ${esc(r.confidence_reason)}</div>`:""}
+  ${r.data_caveats?`<div class="caveat"><b>Data notes:</b> ${esc(r.data_caveats)}</div>`:""}</div>`;
+  $("out").scrollIntoView({behavior:"smooth",block:"start"});
+}
+</script>
+</body>
+</html>
